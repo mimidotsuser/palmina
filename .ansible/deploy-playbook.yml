@@ -28,6 +28,8 @@
         path: "{{remote_path}}"
         state: directory
         mode: '0755'
+        owner: "{{ansible_user_id}}"
+        group: "{{ansible_user_id}}"
       when: docker_config.stat.exists == False
 
     - name: Copy new application files to deployment path
@@ -37,6 +39,8 @@
         delete: yes
         recursive: yes
         perms: no
+        group: no
+        owner: no
         rsync_opts:
           - "--exclude-from={{local_path}}/.rsync.ignore"
 
@@ -50,12 +54,17 @@
         regexp: '^%DB_DATABASE='
       no_log: True
 
-    - name:
+    - name: Change permissions for storage folder
       shell:
-          cmd: chown www-data -R storage chmod 0755 -R storage
+          cmd: "chown {{nginx_user_group}} -R storage && chmod 0755 -R storage"
       args:
           chdir: "{{remote_path}}"
-      ignore_errors: True
+      become: True
+
+    - name: Create symlink between storage and public folder
+      shell:
+          cmd: "ln -s {{remote_path}}/storage {{remote_path}}/public/storage"
+      become: True
 
     - name: Start the docker-compose services
       shell:
