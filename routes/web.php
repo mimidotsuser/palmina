@@ -46,3 +46,13 @@ Route::group(['middleware' => 'guest'], function () {
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function () {
+
+    Route::get('', function () {
+        return redirect('admin/users');
+    })->name('dashboard');
+
+    Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
+    Route::get('users/{user}', [UserController::class, 'show'])->name('admin.users.show');
+});

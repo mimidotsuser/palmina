@@ -30,7 +30,7 @@ class UserController extends Controller
         if ($request->expectsJson()) {
             return new UserResource($request->user());
         } else {
-            return view('admin.user-show', ['user' => $user]);
+            return view('admin.users-show', ['user' => $user]);
         }
 
     }
