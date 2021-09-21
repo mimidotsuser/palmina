@@ -50,6 +50,12 @@
         regexp: '^%DB_DATABASE='
       no_log: True
 
+    - name:
+      shell:
+          cmd: chown www-data -R storage chmod 0755 -R storage
+      args:
+          chdir: "{{remote_path}}"
+      ignore_errors: True
 
     - name: Start the docker-compose services
       shell:
