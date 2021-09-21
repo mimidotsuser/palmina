@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  palimnadb:
+    container_name: ${DB_HOST?err}
+    image: mariadb:10.6.4
+    restart: on-failure
+    ports:
+      - "${DB_PORT?err}"
+    volumes:
+      - ./data/sqldb/:/var/lib/mysql
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: "${DB_DATABASE?err}"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # for development use only
+      MYSQL_PASSWORD: "${DB_PASSWORD?err}"
+      MYSQL_USER: "${DB_USERNAME?err}"
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      lava:
+        ipv4_address: 172.0.10.6
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      lava:
+        ipv4_address: 172.0.10.7
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: on-failure
+    volumes:
+      - $PWD:/var/www/html
+      - $PWD/nginx-sample.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - palimna
+    networks:
+      lava:
+        ipv4_address: 172.0.10.8
+
+  palimna:
+    depends_on:
+      - palimnadb

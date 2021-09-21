@@ -1,0 +1,71 @@
+---
+- name: Deploy with docker-compose
+  become: false
+  gather_facts: no
+  hosts: all
+  vars:
+    local_path: "{{local_workspace|default('~/matomo-analytics/')}}"
+    remote_path: "{{remote_workspace|default('~/workspace/matomo-analytics/')}}"
+    prod_env: "{{lookup('file',local_path+'/.env-enc')}}"
+    nginx_user_group: "www-data"
+
+  tasks:
+    - name: Check if docker compose exist
+      ansible.builtin.stat:
+         path: "{{remote_path}}/docker-compose.yml"
+      register: docker_config
+
+    - name: Stop all existing services
+      ansible.builtin.shell:
+        cmd: docker-compose down
+      args:
+        chdir: "{{remote_path}}"
+      when: docker_config.stat.exists
+      ignore_errors: True
+
+    - name: Create deployment directory if it does not exist
+      ansible.builtin.file:
+        path: "{{remote_path}}"
+        state: directory
+        mode: '0755'
+      when: docker_config.stat.exists == False
+
+    - name: Copy new application files to deployment path
+      ansible.posix.synchronize:
+        src: "{{local_path}}/"
+        dest: "{{remote_path}}/"
+        delete: yes
+        recursive: yes
+        perms: no
+        rsync_opts:
+          - "--exclude=data/"
+          - "--exclude=.ansible/"
+          - "--exclude=.github/"
+          - "--exclude=.git/"
+          - "--exclude=.gitignore"
+          - "--exclude=nginx-sample.conf"
+          - "--exclude=readme.md"
+          - "--exclude=.releaserc"
+          - "--exclude=.env-enc"
+          - "--exclude=.env-example"
+          - "--exclude=node_modules"
+          - "--exclude=tests"
+          - "--exclude=docker-compose.override.yml"
+
+
+    - name: Upload environment variable
+      ansible.builtin.lineinfile:
+        line: "{{prod_env}}"
+        path: "{{remote_path}}/.env"
+        state: present
+        create: yes
+        mode: 0644
+        regexp: '^%DB_DATABASE='
+      no_log: True
+
+
+    - name: Start the docker-compose services
+      shell:
+        cmd: docker-compose -f docker-compose.yml up --build -d
+      args:
+        chdir: "{{remote_path}}"
