@@ -1,0 +1,47 @@
+name: Release
+on:
+  pull_request:
+    branches:
+      - release
+
+jobs:
+  release:
+    name: Test & Deploy
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # space for testing
+
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v2
+        id: semverelease
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Ensure Ansible is installed
+        if: ${{steps.semverelease.outputs.new_release_published}} == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt install ansible -y
+      - name: Create ansible config directory
+        run: mkdir  ${{github.workspace}}/../ansible-temp/
+
+      - name: Run ansible deployment playbook
+        if: ${{steps.semverelease.outputs.new_release_published}} == 'true'
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: ${{github.workspace}}/.ansible/deploy-playbook.yml
+          key: ${{secrets.SSH_PRIVATE_KEY}}
+          vault_password: ${{secrets.ANSIBLE_VAULT_PASSWORD}}
+          requirements: ${{github.workspace}}/.ansible/requirements.yml
+          directory: ${{github.workspace}}/../ansible-temp/
+          inventory: |
+            [all]
+            ${{secrets.MAIN_SERVER}}
+          options: |
+            -v
+            -u ubuntu
+            -e "remote_workspace=${{secrets.REMOTE_WORKSPACE}} local_workspace=${{github.workspace}}"
