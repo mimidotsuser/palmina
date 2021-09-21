@@ -38,20 +38,7 @@
         recursive: yes
         perms: no
         rsync_opts:
-          - "--exclude=data/"
-          - "--exclude=.ansible/"
-          - "--exclude=.github/"
-          - "--exclude=.git/"
-          - "--exclude=.gitignore"
-          - "--exclude=nginx-sample.conf"
-          - "--exclude=readme.md"
-          - "--exclude=.releaserc"
-          - "--exclude=.env-enc"
-          - "--exclude=.env-example"
-          - "--exclude=node_modules"
-          - "--exclude=tests"
-          - "--exclude=docker-compose.override.yml"
-
+          - "--exclude-from={{local_path}}/.rsync.ignore"
 
     - name: Upload environment variable
       ansible.builtin.lineinfile:
