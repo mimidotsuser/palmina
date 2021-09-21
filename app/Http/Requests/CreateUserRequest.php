@@ -26,8 +26,8 @@ class CreateUserRequest extends FormRequest
         return [
             'name' => 'required|max:255|min:1',
             'password' => 'required|min:8|max:50|confirmed',
-            'email' => 'required_without:phone_number|email|max:255|unique:users,email',
-            'phone_number' => 'required_without:email|unique:users,phone_number|regex:/(254)[0-9]{9}/' //only kenyan numbers for demo
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone_number' => 'sometimes|unique:users,phone_number|regex:/(254)[0-9]{9}/' //only kenyan numbers for demo
         ];
     }
 
