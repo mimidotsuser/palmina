@@ -17,8 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::group(['prefix' => 'auth', 'namespace' => 'App\Http\Controllers\Auth', 'middleware' => 'guest'], function () {
         Route::post('register', 'RegisteredUserController@store');
-        Route::post('login', 'AuthenticatedSessionController@store');
+        Route::post('login', 'AuthenticatedSessionController@store'); //I am allowing both admin & basic user
     });
 
-
+    Route::group(['middleware'=>'auth:sanctum','namespace' => 'App\Http\Controllers'], function () {
+        Route::get('users/me', 'UserController@show');
+    });
 });
