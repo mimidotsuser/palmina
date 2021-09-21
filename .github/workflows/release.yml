@@ -49,5 +49,5 @@ jobs:
             ${{secrets.MAIN_SERVER}}
           options: |
             -v
-            -u root
+            -u  ${{secrets.SSH_USER}}
             -e "remote_workspace=${{secrets.REMOTE_WORKSPACE}} local_workspace=${{github.workspace}}"
