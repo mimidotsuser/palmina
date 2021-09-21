@@ -10,9 +10,15 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
+      - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+        with:
+          php-version: '7.4'
+
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install PHP dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       # space for testing
 
       - name: Release
@@ -43,5 +49,5 @@ jobs:
             ${{secrets.MAIN_SERVER}}
           options: |
             -v
-            -u ubuntu
+            -u root
             -e "remote_workspace=${{secrets.REMOTE_WORKSPACE}} local_workspace=${{github.workspace}}"
