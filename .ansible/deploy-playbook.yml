@@ -8,6 +8,8 @@
     remote_path: "{{remote_workspace|default('~/workspace/matomo-analytics/')}}"
     prod_env: "{{lookup('file',local_path+'/.env-enc')}}"
     nginx_user_group: "www-data"
+    remote_files_user: {{remote_files_user|default('ubuntu')}}
+    remote_files_group: {{remote_files_group|default('ubuntu)}}
 
   tasks:
     - name: Check if docker compose exist
@@ -28,8 +30,8 @@
         path: "{{remote_path}}"
         state: directory
         mode: '0755'
-        owner: "{{ansible_user_id}}"
-        group: "{{ansible_user_id}}"
+        owner: "{{remote_files_user}}"
+        group: "{{remote_files_group}}"
       when: docker_config.stat.exists == False
 
     - name: Copy new application files to deployment path
