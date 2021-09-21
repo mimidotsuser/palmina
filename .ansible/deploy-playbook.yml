@@ -8,8 +8,8 @@
     remote_path: "{{remote_workspace|default('~/workspace/matomo-analytics/')}}"
     prod_env: "{{lookup('file',local_path+'/.env-enc')}}"
     nginx_user_group: "www-data"
-    remote_files_user: "{{remote_files_user|default('ubuntu')}}"
-    remote_files_group: "{{remote_files_group|default('ubuntu)}}"
+    remote_files_user: "ubuntu"
+    remote_files_group: "ubuntu"
 
   tasks:
     - name: Check if docker compose exist
