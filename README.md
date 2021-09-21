@@ -35,7 +35,7 @@ Sample body `/api/v1/auth/login`
 ```
 
 ## Local setup
-### Prerequsite
+### Prerequisite
 - PHP 7.4+
 - Mysql database
 - Composer
